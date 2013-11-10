@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <div id="container" data-lg-module="testModule">
+
+        <button id="click" data-lg-click="clickme">click me</button>
+
+
+    </div>
+
+    <script type="text/javascript" src="src/underscore.js"></script>
+    <script type="text/javascript" src="src/core.js"></script>
+    <script type="text/javascript">
+//        lego.bootstrap(document.getElementById('container'));
+        var MyApp = lego.Application.extend({
+             id:'myApp'
+        });
+
+        var myApp = new MyApp();
+
+        myApp.registerModule('dataService',[], function () {
+            return {
+                init: function () {
+                    console.log('dataService started');
+                }
+            }
+        });
+
+        myApp.registerModule('myModule',['dataService'], function (dep) {
+
+            return {
+                init: function(){
+                    console.log('myModule started');
+                    console.log(dep);
+                }
+            }
+        });
+        myApp.bootstrap();
+    </script>
+</body>
+</html>

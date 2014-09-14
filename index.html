@@ -29,15 +29,36 @@
             }
         });
 
-        myApp.registerModule('myModule',['dataService'], function (dep) {
 
+        myApp.registerModule('myModule2', ['dataService'], function (dep) {
+
+            return {
+                init: function(){
+                this.sandbox.listen('myModule', function(data) {
+                    this.doSth(data);
+                    },this);
+                },
+                doSth: function(data) {
+                    console.log(data);
+                }
+            };
+        });
+
+        myApp.registerModule('myModule',['dataService'], function (dep) {
+            var clickme = document.querySelector('#click');
             return {
                 init: function(){
                     console.log('myModule started');
                     console.log(dep);
+                    clickme.addEventListener('click', this.onbuttonClick.bind(this));
+                },
+                onbuttonClick: function() { 
+                    this.sandbox.notify('myModule', 'hello world');
                 }
-            }
+
+            };
         });
+
         myApp.bootstrap();
     </script>
 </body>

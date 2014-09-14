@@ -72,6 +72,7 @@ var lego;
 
         function Application(applicationId) {
             this.applicationId = applicationId;
+            this.messagehub = {};
             this.modules = {};
         }
 
@@ -83,6 +84,33 @@ var lego;
                     instance: null,
                     hasStarted: false
                 };
+            },
+
+            notify: function(channel, note) {
+                var subscribers = this.messagehub[channel];
+                if(!subscribers) return;
+                for(var i = 0; i < subscribers.length; i++) {
+                    if(!Array.isArray(note)) {
+                        note = [note];
+                    }
+                    var subscriber = subscribers[i];
+                    subscriber.handler.apply(subscriber.thisArg, note);
+                }
+            },
+
+            listen: function(channel, handler, thisArg) {
+                if(!this.messagehub[channel]) {
+                    this.messagehub[channel] = [{
+                        handler: handler,
+                        thisArg: thisArg
+                    }];
+                }
+                else {
+                    this.messagehub[channel].push({
+                        handler: handler,
+                        thisArg: thisArg
+                    });
+                }
             },
 
             start: function (moduleId) {
@@ -98,6 +126,7 @@ var lego;
                     }
                 });
                 module.instance = module.creator(dep/*new Sandbox(this)*/);
+                module.instance.sandbox = new Sandbox(this);
                 //todo: move the init function to prototype
                 module.instance.init();
 
@@ -127,6 +156,18 @@ var lego;
 
         return Application;
     }());
+
+    function Sandbox(application) {
+        this.application = application;
+    }
+
+    Sandbox.prototype.notify = function() {
+        this.application.notify.apply(this.application, arguments);
+    };
+
+    Sandbox.prototype.listen = function() {
+        this.application.listen.apply(this.application, arguments);
+    }
 
 
 
